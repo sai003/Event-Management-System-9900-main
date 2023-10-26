@@ -1,0 +1,311 @@
+swagger: "2.0"
+info:
+  description: "Groups API for ZeroWing Event Management System."
+  version: "1.0.0"
+  title: "Groups API"
+host: "localhost:8082"
+basePath: "/v1"
+schemes:
+- "https"
+- "http"
+paths:
+  /groups:
+    get:
+      summary: "Retrieve a List of Groups. Search by Event ID or Account ID."
+      tags:
+        - Groups
+      operationId: "listGroups"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "event_id"
+        in: "query"
+        description: "The Event ID to search for."
+        required: false
+        type: "string"
+      - name: "account_id"
+        in: "query"
+        description: "The Account ID to search for."
+        required: false
+        type: "string"
+      responses:
+        "200":
+          description: "Returns a list of Groups. Returns empty array if no Groups match the search criteria."
+          schema:
+            $ref: "#/definitions/GroupList"
+        "500":
+          description: "Unexpected failure in the service layer."
+          schema:
+            $ref: "#/definitions/UnexpectedServiceError"
+    post:
+      summary: "Used to create an Group."
+      tags:
+        - Groups
+      operationId: "createGroup"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Event object containing the Group details."
+        required: true
+        schema:
+          $ref: "#/definitions/Group"
+      responses:
+        "201":
+          description: "Group created."
+          schema:
+            $ref: "#/definitions/Group"
+        "400":
+          description: "Invalid input."
+          schema:
+            $ref: "#/definitions/InvalidInputError"
+        "500":
+          description: "Unexpected failure in the service layer."
+          schema:
+            $ref: "#/definitions/UnexpectedServiceError"
+  /groups/{group_id}:
+    get:
+      summary: "Retrieve Group details by Group ID."
+      tags:
+        - Groups
+      operationId: "getGroupDetails"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "group_id"
+        in: "path"
+        description: "ID of the Group to be retrieved."
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        "200":
+          description: "Group details successfully retrieved."
+          schema:
+            $ref: "#/definitions/Group"
+        "404":
+          description: "Group not found."
+          schema:
+            $ref: "#/definitions/GroupNotFoundError"
+        "500":
+          description: "Unexpected failure in the service layer."
+          schema:
+            $ref: "#/definitions/UnexpectedServiceError" 
+    put:
+      summary: "Used to update the Group details. Replaces the Group resource."
+      tags:
+        - Groups
+      operationId: "updateGroup"
+      consumes:
+      - "application/json"
+      parameters:
+      - name: "group_id"
+        in: "path"
+        description: "ID of the Group to be updated."
+        required: true
+        type: "integer"
+        format: "int64"
+      - in: "body"
+        name: "body"
+        description: "Group object to update. Performs a complete replace of the Group details."
+        required: true
+        schema:
+          $ref: "#/definitions/Group"
+      responses:
+        "200":
+          description: "Group successfully updated."
+          schema:
+            $ref: "#/definitions/Group"          
+        "404":
+          description: "Group not found." 
+          schema:
+            $ref: "#/definitions/GroupNotFoundError"
+        "400":
+          description: "Invalid input."
+          schema:
+            $ref: "#/definitions/InvalidInputError"
+        "500":
+          description: "Unexpected failure in the service layer."
+          schema:
+            $ref: "#/definitions/UnexpectedServiceError"
+  /groups/{group_id}/members:
+    post:
+      summary: "Used to create a new Group Memeber for a Group."
+      tags:
+        - Groups
+      operationId: "createGroupMember"
+      consumes:
+      - "application/json"
+      parameters:
+      - name: "group_id"
+        in: "path"
+        description: "ID of the Group."
+        required: true
+        type: "integer"
+        format: "int64"
+      - in: "body"
+        name: "body"
+        description: "The details of the Group Member to be created."
+        required: true
+        schema:
+          $ref: "#/definitions/GroupMember"
+      responses:
+        "200":
+          description: "Group Member successfully created."
+          schema:
+            $ref: "#/definitions/GroupMember"
+        "404":
+          description: "Group not found." 
+          schema:
+            $ref: "#/definitions/GroupNotFoundError"
+  /groups/{group_id}/members/{group_membership_id}: 
+    patch:
+      summary: "Used to PATCH the status of a Group Membership."
+      tags:
+        - Groups
+      operationId: "updateGroupMemberStatus"
+      consumes:
+      - "application/json"
+      parameters:
+      - name: "group_id"
+        in: "path"
+        description: "ID of the Group."
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "group_membership_id"
+        in: "path"
+        description: "ID of the Group Membership."
+        required: true
+        type: "integer"
+        format: "int64"
+      - in: "body"
+        name: "body"
+        description: "The details of the PATCH operation to be performed."
+        required: true
+        schema:
+          $ref: "#/definitions/GroupStatusUpdate"
+      responses:
+        "200":
+          description: "Group Member status successfully PATCHED."
+          schema:
+            $ref: "#/definitions/GroupStatusUpdate"
+        "404":
+          description: "Group not found." 
+          schema:
+            $ref: "#/definitions/GroupNotFoundError"
+definitions:
+  GroupMember:
+    type: object
+    properties:
+      group_membership_id:
+        type: integer
+        format: int64
+        example: 1
+      account_id:
+        type: integer
+        format: int64
+        example: 2
+      group_id:
+        type: integer
+        format: int64
+        example: 3
+      join_status:
+        type: string
+        enum: ["Pending", "Accepted", "Rejected"]
+      join_desc:
+        type: string
+        example: "Why I want to join this group ..."
+      interest_tags:
+        type: array
+        items:
+          $ref: "#/definitions/Tag"
+  GroupList:
+    type: array
+    items:
+      $ref: "#/definitions/Group"
+  Group:
+    type: object
+    properties:
+      group_id:
+        type: integer
+        format: int64
+        example: 1
+      group_host_id:
+        type: integer
+        format: int64
+        example: 2
+      event_id:
+        type: integer
+        format: int64
+        example: 2
+      group_name:
+        type: string
+        example: "The Group Name"
+      group_img:
+        type: string
+        example: "bc7b098c-fb66-11ec-b939-0242ac120002"
+      group_desc:
+        type: string
+        example: "A blurb about the group"
+      group_members:
+        type: array
+        items:
+          $ref: "#/definitions/GroupMember"
+  Tag:
+    type: object
+    properties:
+      name:
+        type: string
+        example: Jazz
+  GroupStatusUpdate:
+    type: object
+    properties:
+      op:
+        type: string
+        example: replace
+        enum: [replace]
+      path:
+        type: string
+        enum: [/join_status]
+      value:
+        type: string
+        example: "Accepted"
+        enum: ["Pending", "Accepted", "Rejected"]
+    required: 
+      - op
+      - path
+      - value
+  Error:
+    type: object
+    properties:
+      code:
+        type: string
+      type:
+        type: string
+      message:
+        type: string
+  GroupNotFoundError:
+    allOf:
+      - $ref: "#/definitions/Error"
+    example:
+      code: 404
+      type: GroupNotFoundError
+      message: "The following Group does not exist: %group_id%"
+  InvalidInputError:
+    allOf:
+      - $ref: "#/definitions/Error"
+    example:
+      code: 400
+      type: InvalidInputError
+      message: "The following mandatory fields were not provided: %field_name_1%, %field_name_2%"
+  UnexpectedServiceError:
+    allOf:
+      - $ref: "#/definitions/Error"
+    example:
+      code: 500
+      type: UnexpectedServiceError
+      message: "The following unexpected runtime error has occurred: %error%" 
