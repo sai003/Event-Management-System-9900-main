@@ -1,0 +1,108 @@
+swagger: "2.0"
+info:
+  description: "Email API for ZeroWing Event Management System."
+  version: "1.0.0"
+  title: "Email API"
+host: "localhost:8083"
+basePath: "/v1"
+schemes:
+- "https"
+- "http"
+paths:
+  /email:
+    post:
+      summary: "Used to send an Email."
+      tags:
+        - Email
+      operationId: "sendEmail"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Email object containing the Email details."
+        required: true
+        schema:
+          $ref: "#/definitions/Email"
+      responses:
+        "200":
+          description: "Email Sent."
+          schema:
+            $ref: "#/definitions/Email"
+        "400":
+          description: "Invalid input."
+          schema:
+            $ref: "#/definitions/InvalidInputError"
+        "500":
+          description: "Unexpected failure in the service layer."
+          schema:
+            $ref: "#/definitions/UnexpectedServiceError"
+    options:
+      summary: "Used to respond to browser with Access-Control-Allow-Methods header. Required for POST."
+      tags:
+        - Email
+      operationId: "sendEmailOptions"
+      responses:
+        "200":
+          description: "Response headers will indicate the allowable methods."
+definitions:
+  Email:
+    type: object
+    properties:
+      email_subject:
+        type: string
+        example: "Hello World!"
+      email_content:
+        type: string
+        example: "Heya! Please work"
+      email_from:
+        allOf:
+          - $ref: "#/definitions/Sender"
+        example:
+          email_address: "eventastic@gmail.com"
+          name: "EvenTastic"
+      email_to:
+        type: array
+        items:
+          $ref: "#/definitions/Receiver"
+  Receiver:
+    type: object
+    properties:
+      email_address:
+        type: string
+        example: "bob@gmail.com"
+      name:
+        type: string
+        example: "Bob"
+  Sender:
+    type: object
+    properties:
+      email_address:
+        type: string
+      name:
+        type: string
+  Error:
+    type: object
+    properties:
+      code:
+        type: string
+      type:
+        type: string
+      message:
+        type: string
+  InvalidInputError:
+    allOf:
+      - $ref: "#/definitions/Error"
+    example:
+      code: 400
+      type: InvalidInputError
+      message: "The following mandatory fields were not provided: %field_name_1%, %field_name_2%"
+  UnexpectedServiceError:
+    allOf:
+      - $ref: "#/definitions/Error"
+    example:
+      code: 500
+      type: UnexpectedServiceError
+      message: "The following unexpected runtime error has occurred: %error%" 

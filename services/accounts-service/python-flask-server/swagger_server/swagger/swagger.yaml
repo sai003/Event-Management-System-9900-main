@@ -1,0 +1,540 @@
+---
+swagger: "2.0"
+info:
+  description: "Accounts API for ZeroWing Event Management System."
+  version: "1.0.0"
+  title: "Accounts API"
+host: "localhost:8080"
+basePath: "/v1"
+schemes:
+- "https"
+- "http"
+paths:
+  /accounts:
+    get:
+      tags:
+      - "Accounts"
+      summary: "Retrieve a List of Accounts. Filter by email address, first name or\
+        \ last name."
+      operationId: "list_accounts"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "email"
+        in: "query"
+        description: "The email address to filter on."
+        required: false
+        type: "string"
+      - name: "first_name"
+        in: "query"
+        description: "The first name to filter on."
+        required: false
+        type: "string"
+      - name: "last_name"
+        in: "query"
+        description: "The last name to filter on."
+        required: false
+        type: "string"
+      responses:
+        "200":
+          description: "Returns a list of Accounts. Returns empty array if no Accounts\
+            \ exist."
+          schema:
+            $ref: "#/definitions/AccountList"
+        "500":
+          description: "Unexpected failure in the service layer."
+          schema:
+            $ref: "#/definitions/UnexpectedServiceError"
+      x-swagger-router-controller: "swagger_server.controllers.accounts_controller"
+    post:
+      tags:
+      - "Accounts"
+      summary: "Used to create an Account."
+      operationId: "create_account"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Account object containing the Account details."
+        required: true
+        schema:
+          $ref: "#/definitions/Account"
+      responses:
+        "201":
+          description: "Account created."
+          schema:
+            $ref: "#/definitions/Account"
+        "400":
+          description: "Invalid input."
+          schema:
+            $ref: "#/definitions/InvalidInputError"
+        "500":
+          description: "Unexpected failure in the service layer."
+          schema:
+            $ref: "#/definitions/UnexpectedServiceError"
+      x-swagger-router-controller: "swagger_server.controllers.accounts_controller"
+  /accounts/{account_id}:
+    get:
+      tags:
+      - "Accounts"
+      summary: "Retrieve Account details by Account ID."
+      operationId: "get_account_details"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "account_id"
+        in: "path"
+        description: "ID of the Account to be retrieved."
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        "200":
+          description: "Account details successfully retrieved."
+          schema:
+            $ref: "#/definitions/Account"
+        "404":
+          description: "Account not found."
+          schema:
+            $ref: "#/definitions/AccountNotFoundError"
+        "500":
+          description: "Unexpected failure in the service layer."
+          schema:
+            $ref: "#/definitions/UnexpectedServiceError"
+      x-swagger-router-controller: "swagger_server.controllers.accounts_controller"
+    put:
+      tags:
+      - "Accounts"
+      summary: "Used to update the Account details. Replaces the Account resource."
+      operationId: "update_account"
+      consumes:
+      - "application/json"
+      parameters:
+      - name: "account_id"
+        in: "path"
+        description: "ID of the Account to be updated."
+        required: true
+        type: "integer"
+        format: "int64"
+      - in: "body"
+        name: "body"
+        description: "Account object to update. Performs a complete replace of the\
+          \ Account details."
+        required: true
+        schema:
+          $ref: "#/definitions/Account"
+      responses:
+        "200":
+          description: "Account successfully updated."
+          schema:
+            $ref: "#/definitions/Account"
+        "400":
+          description: "Invalid input."
+          schema:
+            $ref: "#/definitions/InvalidInputError"
+        "404":
+          description: "Account not found."
+          schema:
+            $ref: "#/definitions/AccountNotFoundError"
+        "500":
+          description: "Unexpected failure in the service layer."
+          schema:
+            $ref: "#/definitions/UnexpectedServiceError"
+      x-swagger-router-controller: "swagger_server.controllers.accounts_controller"
+    patch:
+      tags:
+      - "Accounts"
+      summary: "Used to update the Reward Points total for an account."
+      operationId: "update_reward_points"
+      consumes:
+      - "application/json"
+      parameters:
+      - name: "account_id"
+        in: "path"
+        description: "ID of the Account to be updated."
+        required: true
+        type: "integer"
+        format: "int64"
+      - in: "body"
+        name: "body"
+        description: "The patch operation to perform. Only Reward Points update is\
+          \ supported."
+        required: true
+        schema:
+          $ref: "#/definitions/RewardPointsUpdate"
+      responses:
+        "200":
+          description: "Reward Points successfully updated."
+          schema:
+            $ref: "#/definitions/Account"
+        "404":
+          description: "Account not found."
+          schema:
+            $ref: "#/definitions/AccountNotFoundError"
+      x-swagger-router-controller: "swagger_server.controllers.accounts_controller"
+  /accounts/{account_id}/credit_card:
+    get:
+      tags:
+      - "Accounts"
+      summary: "Used to retrive the Credit Card details for an Account."
+      operationId: "get_credit_card"
+      parameters:
+      - name: "account_id"
+        in: "path"
+        description: "ID of the Account."
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        "200":
+          description: "Credit Card details retrieved."
+          schema:
+            $ref: "#/definitions/CreditCard"
+        "404":
+          description: "Account not found."
+          schema:
+            $ref: "#/definitions/AccountNotFoundError"
+        "500":
+          description: "Unexpected failure in the service layer."
+          schema:
+            $ref: "#/definitions/UnexpectedServiceError"
+      x-swagger-router-controller: "swagger_server.controllers.accounts_controller"
+    put:
+      tags:
+      - "Accounts"
+      summary: "Used to update the Credit Card details for an Account."
+      operationId: "update_credit_card"
+      parameters:
+      - name: "account_id"
+        in: "path"
+        description: "ID of the Account."
+        required: true
+        type: "integer"
+        format: "int64"
+      - in: "body"
+        name: "body"
+        description: "Credit Card object to update. Performs a complete replace of\
+          \ the Credit Card details."
+        required: true
+        schema:
+          $ref: "#/definitions/CreditCard"
+      responses:
+        "200":
+          description: "Credit Card successfully updated."
+          schema:
+            $ref: "#/definitions/CreditCard"
+        "400":
+          description: "Invalid input."
+          schema:
+            $ref: "#/definitions/InvalidInputError"
+        "404":
+          description: "Account not found."
+          schema:
+            $ref: "#/definitions/AccountNotFoundError"
+        "500":
+          description: "Unexpected failure in the service layer."
+          schema:
+            $ref: "#/definitions/UnexpectedServiceError"
+      x-swagger-router-controller: "swagger_server.controllers.accounts_controller"
+  /accounts/{account_id}/host_details:
+    get:
+      tags:
+      - "Accounts"
+      summary: "Used to retrive the Host details for an Account."
+      operationId: "get_host_details"
+      parameters:
+      - name: "account_id"
+        in: "path"
+        description: "ID of the Account."
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        "200":
+          description: "Host details retrieved."
+          schema:
+            $ref: "#/definitions/HostDetails"
+        "404":
+          description: "Account not found."
+          schema:
+            $ref: "#/definitions/AccountNotFoundError"
+        "500":
+          description: "Unexpected failure in the service layer."
+          schema:
+            $ref: "#/definitions/UnexpectedServiceError"
+      x-swagger-router-controller: "swagger_server.controllers.accounts_controller"
+    put:
+      tags:
+      - "Accounts"
+      summary: "Used to update the host details for an Account."
+      operationId: "update_host_details"
+      parameters:
+      - name: "account_id"
+        in: "path"
+        description: "ID of the Account."
+        required: true
+        type: "integer"
+        format: "int64"
+      - in: "body"
+        name: "body"
+        description: "Host details object to update. Performs a complete replace of\
+          \ the Host details."
+        required: true
+        schema:
+          $ref: "#/definitions/HostDetails"
+      responses:
+        "200":
+          description: "Host details successfully updated."
+          schema:
+            $ref: "#/definitions/HostDetails"
+        "400":
+          description: "Invalid input."
+          schema:
+            $ref: "#/definitions/InvalidInputError"
+        "404":
+          description: "Account not found."
+          schema:
+            $ref: "#/definitions/AccountNotFoundError"
+        "500":
+          description: "Unexpected failure in the service layer."
+          schema:
+            $ref: "#/definitions/UnexpectedServiceError"
+      x-swagger-router-controller: "swagger_server.controllers.accounts_controller"
+  /host_details:
+    get:
+      tags:
+      - "Accounts"
+      summary: "Retrieve a List of Host Details. Filter by status."
+      operationId: "list_host_details"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "host_status"
+        in: "query"
+        description: "The Host Status to filter on."
+        required: false
+        type: "string"
+      responses:
+        "200":
+          description: "Returns a list of Host Details. Returns empty array if no\
+            \ Host Details exist."
+          schema:
+            $ref: "#/definitions/HostDetails"
+        "500":
+          description: "Unexpected failure in the service layer."
+          schema:
+            $ref: "#/definitions/UnexpectedServiceError"
+      x-swagger-router-controller: "swagger_server.controllers.accounts_controller"
+definitions:
+  AccountList:
+    type: "array"
+    items:
+      $ref: "#/definitions/Account"
+  Account:
+    type: "object"
+    required:
+    - "email"
+    - "first_name"
+    - "last_name"
+    - "password"
+    properties:
+      account_id:
+        type: "integer"
+        format: "int64"
+        example: 1
+      account_type:
+        type: "string"
+        enum:
+        - "Customer"
+        - "Host"
+        - "Admin"
+      user_desc:
+        type: "string"
+        example: "Hello I am Bob, I like cheese."
+      first_name:
+        type: "string"
+        example: "Bob"
+      last_name:
+        type: "string"
+        example: "Smith"
+      location:
+        type: "string"
+        example: "Neutral Bay, NSW, 2089"
+      email:
+        type: "string"
+        example: "bob.smith@gmail.com"
+      password:
+        type: "string"
+        example: "Cartoon-Duck-14-Coffee-Glvs"
+      mobile:
+        type: "string"
+        example: "+61405123456"
+      profile_pic:
+        type: "string"
+        format: "uuid"
+        example: "1603dfd6-efb6-11ec-8ea0-0242ac120002"
+      age:
+        type: "integer"
+        format: "int64"
+        example: 36
+      reward_points:
+        type: "string"
+        example: "1250.5"
+      tags:
+        type: "array"
+        items:
+          $ref: "#/definitions/Tag"
+    example:
+      account_type: "Customer"
+      mobile: "+61405123456"
+      profile_pic: "1603dfd6-efb6-11ec-8ea0-0242ac120002"
+      last_name: "Smith"
+      reward_points: "1250.5"
+      tags:
+      - name: "Jazz"
+      - name: "Jazz"
+      user_desc: "Hello I am Bob, I like cheese."
+      password: "Cartoon-Duck-14-Coffee-Glvs"
+      account_id: 1
+      location: "Neutral Bay, NSW, 2089"
+      first_name: "Bob"
+      email: "bob.smith@gmail.com"
+      age: 36
+  Tag:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+        example: "Jazz"
+    example:
+      name: "Jazz"
+  CreditCard:
+    type: "object"
+    properties:
+      card_name:
+        type: "string"
+        example: "Bob Smith"
+      card_number:
+        type: "string"
+        example: "1111222233334444"
+      card_type:
+        type: "string"
+        example: "Visa"
+      card_expiry:
+        type: "string"
+        example: "MMYY"
+    example:
+      card_number: "1111222233334444"
+      card_name: "Bob Smith"
+      card_type: "Visa"
+      card_expiry: "MMYY"
+  HostDetails:
+    type: "object"
+    properties:
+      host_id:
+        type: "integer"
+        format: "int64"
+        example: 1
+      account_id:
+        type: "integer"
+        format: "int64"
+        example: 1
+      org_name:
+        type: "string"
+        example: "All Star Entertainment"
+      org_desc:
+        type: "string"
+        example: "Blurb describing the organisation"
+      org_email:
+        type: "string"
+        example: "bob@allstar.com"
+      host_contact_no:
+        type: "string"
+        example: "+61405123456"
+      job_title:
+        type: "string"
+        example: "Event Manager"
+      qualification:
+        type: "string"
+        example: "Event Management Certificate IV"
+      isVerified:
+        type: "boolean"
+        example: false
+      host_status:
+        type: "string"
+        enum:
+        - "Pending"
+        - "Approved"
+        - "Declined"
+    example:
+      qualification: "Event Management Certificate IV"
+      account_id: 1
+      org_email: "bob@allstar.com"
+      isVerified: false
+      org_desc: "Blurb describing the organisation"
+      host_contact_no: "+61405123456"
+      org_name: "All Star Entertainment"
+      job_title: "Event Manager"
+      host_status: "Pending"
+      host_id: 1
+  RewardPointsUpdate:
+    type: "object"
+    required:
+    - "op"
+    - "path"
+    - "value"
+    properties:
+      op:
+        type: "string"
+        example: "replace"
+        enum:
+        - "replace"
+      path:
+        type: "string"
+        enum:
+        - "/reward_points"
+      value:
+        type: "number"
+        format: "float"
+        example: 100.0
+    example:
+      op: "replace"
+      path: "/reward_points"
+      value: 100.0
+  Error:
+    type: "object"
+    properties:
+      code:
+        type: "string"
+      type:
+        type: "string"
+      message:
+        type: "string"
+  AccountNotFoundError:
+    allOf:
+    - $ref: "#/definitions/Error"
+    - {}
+    example:
+      code: 404
+      type: "AccountNotFoundError"
+      message: "The following Account does not exist: %account_id%"
+  InvalidInputError:
+    allOf:
+    - $ref: "#/definitions/Error"
+    - {}
+    example:
+      code: 400
+      type: "InvalidInputError"
+      message: "The following mandatory fields were not provided: %field_name_1%,\
+        \ %field_name_2%"
+  UnexpectedServiceError:
+    allOf:
+    - $ref: "#/definitions/Error"
+    - {}
+    example:
+      code: 500
+      type: "UnexpectedServiceError"
+      message: "The following unexpected runtime error has occurred: %error%"
